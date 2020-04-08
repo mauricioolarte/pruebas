@@ -41,63 +41,78 @@ int len_pat(char *string, char delimit)
 		if (string[i] == delimit)
 			j++;
 	}
-	printf("estos es j %i\n", j);
 	return (j);
 }
-char **_strtok(char *string, char delimit, char * funct)
+char **_strtok(char *string, char delimit)
 {
-	unsigned int i = 0, j = 0, k = 0, m = 0, split = 0, len = 0, /*lenfunct*/;
+	unsigned int i = 0, j = 0, k = 0, m = 0, split = 5, len = 0, lenstring;
 	char **rstring;
-
-	j = len_pat(string, delimit);
-/*	lenfunct = strlen(funct) + 1;*/
-	printf("lenfunct %u\n", lenfunct);
-	printf("este es path %s\n", string);
-	rstring = (char **)(malloc(sizeof(char *) * j));
-	for (i = 0; string[i] != '\0'; i++)
+	int *tem;
+/* i and split inizializate in 5 for eliminate word "PATH="*/
+	j = len_pat(string, delimit) + 1;
+	tem = (int *)(malloc(sizeof(int) * (j + 1)));
+	lenstring = strlen(string);
+	for (i = 5; string[i] != '\0'; i++)
 	{
 		if (string[i] == delimit)
 		{
-			printf("int%i y k%i\n", i, k);
 			len = i - split;
+			tem[k] = len;
 			split = i + 1;
-			rstring[k] = (char *)(malloc(sizeof(char) * (len + lenfunct)));
 			k++;
 		}
+		if (i == lenstring - 1)
+		{
+			len = i + 2 - split;
+			tem[k] = len;
+			split = i + 1;
+		}
 	}
-	printf("creo que me salgo aqui y k = %i y j =%i \n", k, j);
-/*	rstring[k] = (char *)(malloc(sizeof(char) * (len)));*/
-	printf("esto es i3");
-	split = 0, k = 0;
-	printf("esto es i2");
-	for (i = 0; string[i] != '\0'; i++)
+	rstring = (char **)(malloc(sizeof(char *) * j));
+	for (i = 0; i < j; i++)
+		rstring[i] = (char *)(malloc(sizeof(char) * tem[i] + 1));
+	split = 5, k = 0;
+	for (i = 5; string[i] != '\0'; i++)
 	{
-		if (string[i] != delimit && string[i] != '\0')
+		if (string[i] != delimit)
+		{
 			rstring[k][i - split] = string[i];
+			printf("i = %i\n", i);
+		}
 		else
 		{
-			rstring[k][i - split] = '/';
-			for (m = 0; m < 2; i++)
-				rstring[k][i - split + 1 + m] = funct[m];
-			k++;
+			printf("este es i = %i\n", i);
+			rstring[k][i - split] = '\0';
+			printf("este es n = %c y %i", rstring[k][i - split], (i - split));
 			split = i + 1;
-			}
+			k++;
+		}
+		if (i == lenstring -1)
+		{
+			rstring[k][i + 1 - split] = '\0';
+			printf("este es n = %c y %i", rstring[k][i + 1- split], (i + 1 - split));
+		}
 	}
+	
+	free (tem);
 
-	for (i = 0; i <= k; i++)
-		printf("%s\n",rstring[i]);
-	for (i = 0; i <= k; i++)
-		free(rstring[i]);
-	free(rstring);
-	return (NULL);
+	return (rstring);
 }
 
-int main(void)
+int  main(void)
 {
+	int i;
+	char **r;
 
 
-	_strtok(_getenv("PATH"), ':', "ls");
+	r = _strtok(_getenv("PATH"), ':');
+
+	for (i = 0; i < len_pat(_getenv("PATH"), ':') + 1; i++)
+	{
+		printf("%s\n", r[i]);
+	}
+	free(r);
 	printf("hol");
 
-	return (0);
+	     return (0);
 }
