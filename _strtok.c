@@ -43,13 +43,14 @@ int len_pat(char *string, char delimit)
 	}
 	return (j);
 }
-char **_strtok(char *string, char delimit)
+char **_strtok(char *string, char delimit, char *funct)
 {
-	unsigned int i = 0, j = 0, k = 0, m = 0, split = 5, len = 0, lenstring;
+	unsigned int i = 0, j = 0, k = 0, split = 5, len = 0, lenstring, lenfunct, m;
 	char **rstring;
 	int *tem;
 /* i and split inizializate in 5 for eliminate word "PATH="*/
 	j = len_pat(string, delimit) + 1;
+	lenfunct = strlen(funct) + 1;
 	tem = (int *)(malloc(sizeof(int) * (j + 1)));
 	lenstring = strlen(string);
 	for (i = 5; string[i] != '\0'; i++)
@@ -57,14 +58,14 @@ char **_strtok(char *string, char delimit)
 		if (string[i] == delimit)
 		{
 			len = i - split;
-			tem[k] = len;
+			tem[k] = len + lenfunct;
 			split = i + 1;
 			k++;
 		}
 		if (i == lenstring - 1)
 		{
-			len = i + 2 - split;
-			tem[k] = len;
+			len = i + 1 - split;
+			tem[k] = len + lenfunct;
 			split = i + 1;
 		}
 	}
@@ -75,25 +76,29 @@ char **_strtok(char *string, char delimit)
 	for (i = 5; string[i] != '\0'; i++)
 	{
 		if (string[i] != delimit)
-		{
 			rstring[k][i - split] = string[i];
-			printf("i = %i\n", i);
-		}
 		else
 		{
-			printf("este es i = %i\n", i);
-			rstring[k][i - split] = '\0';
-			printf("este es n = %c y %i", rstring[k][i - split], (i - split));
+			for (m = 0; funct[m] != '\0'; m++)
+			{
+				rstring[k][i - split] = '/';
+				rstring[k][i + 1 - split + m] = funct[m];
+			}
+			rstring[k][i - split + m + 1] = '\0';
 			split = i + 1;
 			k++;
 		}
 		if (i == lenstring -1)
 		{
-			rstring[k][i + 1 - split] = '\0';
-			printf("este es n = %c y %i", rstring[k][i + 1- split], (i + 1 - split));
+			for (m = 0; funct[m] != '\0'; m++)
+			{
+				rstring[k][i - split] = '/';
+				rstring[k][i + 1 - split + m] = funct[m];
+			}
+			rstring[k][i - split + m + 1] = '\0';
 		}
 	}
-	
+/*	rstring[k][i - split] = '\0';*/
 	free (tem);
 
 	return (rstring);
@@ -105,11 +110,12 @@ int  main(void)
 	char **r;
 
 
-	r = _strtok(_getenv("PATH"), ':');
+	r = _strtok(_getenv("PATH"), ':', "ls");
 
 	for (i = 0; i < len_pat(_getenv("PATH"), ':') + 1; i++)
 	{
 		printf("%s\n", r[i]);
+		free(r[i]);
 	}
 	free(r);
 	printf("hol");
