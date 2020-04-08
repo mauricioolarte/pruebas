@@ -43,9 +43,9 @@ int len_pat(char *string, char delimit)
 	}
 	return (j);
 }
-char **_strtok(char *string, char delimit, char *funct)
+char **malloc_strtok(char *string, char delimit, char *funct)
 {
-	unsigned int i = 0, j = 0, k = 0, split = 5, len = 0, lenstring, lenfunct, m;
+	unsigned int i, j, k = 0, split = 5, len = 0, lenstring, lenfunct;
 	char **rstring;
 	int *tem;
 /* i and split inizializate in 5 for eliminate word "PATH="*/
@@ -72,7 +72,18 @@ char **_strtok(char *string, char delimit, char *funct)
 	rstring = (char **)(malloc(sizeof(char *) * j));
 	for (i = 0; i < j; i++)
 		rstring[i] = (char *)(malloc(sizeof(char) * tem[i] + 1));
-	split = 5, k = 0;
+	free (tem);
+	return (rstring);
+}
+
+char **fill_strtok(char *string, char delimit, char *funct)
+{
+
+	unsigned int split = 5, k = 0, i, m, lenstring;
+	char **rstring;
+
+	lenstring = strlen(string);
+	rstring = malloc_strtok(string, delimit, funct);
 	for (i = 5; string[i] != '\0'; i++)
 	{
 		if (string[i] != delimit)
@@ -98,27 +109,40 @@ char **_strtok(char *string, char delimit, char *funct)
 			rstring[k][i - split + m + 1] = '\0';
 		}
 	}
-/*	rstring[k][i - split] = '\0';*/
-	free (tem);
-
 	return (rstring);
 }
 
-int  main(void)
+char *get_path(char *funct)
 {
 	int i;
 	char **r;
+	char *ret;
+	struct stat stats;
 
 
-	r = _strtok(_getenv("PATH"), ':', "ls");
+	r = fill_strtok(_getenv("PATH"), ':', funct);
 
 	for (i = 0; i < len_pat(_getenv("PATH"), ':') + 1; i++)
 	{
-		printf("%s\n", r[i]);
-		free(r[i]);
+
+		if (stat(r[i], &stats) == 0)
+		{
+			ret = r[i];
+			printf("file found %s\n", r[i]);
+			return(ret);
+		}
 	}
+	for (i = 0; i < len_pat(_getenv("PATH"), ':') + 1; i++)
+		free(r[i]);
 	free(r);
 	printf("hol");
+	return (NULL);
+}
 
-	     return (0);
+int main (void)
+{
+	char *r;
+	r = get_path("ls");
+	printf("este es path %s\n", r);
+	return (0);
 }
